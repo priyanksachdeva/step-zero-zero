@@ -79,13 +79,7 @@ const Index = () => {
           settings={settings}
           onSettingsChange={updateSettings}
           onExportData={exportData}
-          onImportData={async (data) => {
-            try {
-              return await importData(data);
-            } catch {
-              return false;
-            }
-          }}
+          onImportData={importData}
           batteryOptimized={batteryOptimized}
           sensorSupported={sensorSupported}
         />
@@ -294,6 +288,7 @@ const Index = () => {
               onClick={() => {
                 const steps = prompt("Enter step count:");
                 if (steps && !isNaN(Number(steps))) {
+                  // Manual step entry would be implemented here
                   console.log("Manual step entry:", steps);
                 }
               }}

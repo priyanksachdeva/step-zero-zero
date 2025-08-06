@@ -2,74 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Nothing-Style Pedometer Design System - Dark-first, minimal, technical */
+/* Nothing-Style Pedometer Design System - Phase 2 Enhanced */
+
+/* Nothing-Inspired Typeface - Ndot 47 */
+@font-face {
+  font-family: "Ndot47";
+  src: url("/fonts/ndot-47-inspired-by-nothing.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 @layer base {
   :root {
-    /* Nothing Design System - Dark Theme */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    /* Nothing Design System - Pure Dark Theme */
+    --background: 0 0% 0%; /* Pure black #000000 */
+    --foreground: 0 0% 100%; /* Pure white #FFFFFF */
 
-    --card: 0 0% 6.7%;
+    --card: 0 0% 4%; /* #0A0A0A */
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 6.7%;
+    --popover: 0 0% 4%;
     --popover-foreground: 0 0% 100%;
 
     --primary: 0 0% 100%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 13.3%;
+    --secondary: 0 0% 8%; /* #141414 */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 13.3%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 8%; /* #141414 */
+    --muted-foreground: 0 0% 45%; /* #737373 */
 
-    --accent: 0 100% 50%;
+    /* Nothing Red - Signature accent */
+    --accent: 0 100% 50%; /* Pure red #FF0000 */
     --accent-foreground: 0 0% 100%;
 
-    --success: 120 100% 50%;
+    --success: 120 100% 40%; /* Green #00CC00 */
     --success-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 13.3%;
-    --input: 0 0% 13.3%;
+    --border: 0 0% 8%; /* #141414 */
+    --input: 0 0% 8%;
     --ring: 0 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0rem; /* Nothing uses sharp corners */
 
-    --glass: 0 0% 100% / 0.05;
-    --progress-bg: 0 0% 20%;
-    
-    /* Technical spacing system - 8px grid */
-    --space-xs: 0.5rem;  /* 8px */
-    --space-sm: 0.75rem; /* 12px */
-    --space-md: 1rem;    /* 16px */
-    --space-lg: 1.5rem;  /* 24px */
-    --space-xl: 2rem;    /* 32px */
-    --space-2xl: 3rem;   /* 48px */
-    
-    /* Nothing Typography Scale */
-    --text-xs: 0.75rem;    /* 12px */
-    --text-sm: 0.875rem;   /* 14px */
-    --text-base: 1rem;     /* 16px */
-    --text-lg: 1.125rem;   /* 18px */
-    --text-xl: 1.25rem;    /* 20px */
-    --text-2xl: 1.5rem;    /* 24px */
-    --text-3xl: 1.875rem;  /* 30px */
-    --text-4xl: 2.25rem;   /* 36px */
-    --text-5xl: 3rem;      /* 48px */
-    --text-6xl: 4rem;      /* 64px */
-    
-    /* Animation system */
-    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Glass morphism - Ultra subtle */
+    --glass-subtle: 0 0% 100% / 0.02;
+    --glass-medium: 0 0% 100% / 0.05;
+    --glass-strong: 0 0% 100% / 0.08;
+
+    /* Progress indicators */
+    --progress-bg: 0 0% 12%; /* #1F1F1F */
+    --progress-fill: 0 100% 50%; /* Nothing red */
+
+    /* Nothing 8px Grid System */
+    --grid-1: 0.125rem; /* 2px */
+    --grid-2: 0.25rem; /* 4px */
+    --grid-4: 0.5rem; /* 8px - base unit */
+    --grid-6: 0.75rem; /* 12px */
+    --grid-8: 1rem; /* 16px */
+    --grid-12: 1.5rem; /* 24px */
+    --grid-16: 2rem; /* 32px */
+    --grid-20: 2.5rem; /* 40px */
+    --grid-24: 3rem; /* 48px */
+    --grid-32: 4rem; /* 64px */
+    --grid-40: 5rem; /* 80px */
+    --grid-48: 6rem; /* 96px */
+    --grid-64: 8rem; /* 128px */
+
+    /* Nothing Typography - Precise Scale */
+    --text-micro: 0.625rem; /* 10px */
+    --text-xs: 0.75rem; /* 12px */
+    --text-sm: 0.875rem; /* 14px */
+    --text-base: 1rem; /* 16px */
+    --text-lg: 1.125rem; /* 18px */
+    --text-xl: 1.25rem; /* 20px */
+    --text-2xl: 1.5rem; /* 24px */
+    --text-3xl: 1.875rem; /* 30px */
+    --text-4xl: 2.25rem; /* 36px */
+    --text-5xl: 3rem; /* 48px */
+    --text-6xl: 3.75rem; /* 60px */
+    --text-7xl: 4.5rem; /* 72px */
+    --text-8xl: 6rem; /* 96px */
+    --text-9xl: 8rem; /* 128px */
+
+    /* Nothing Animation System - Precise timing */
+    --duration-instant: 0.1s;
+    --duration-fast: 0.2s;
+    --duration-normal: 0.3s;
+    --duration-slow: 0.5s;
+    --duration-slower: 0.8s;
+
+    /* Easing curves - Nothing precision */
+    --ease-linear: linear;
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Nothing Shadows - Minimal but functional */
+    --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-glow: 0 0 16px 0 hsl(var(--accent) / 0.15);
+    --shadow-glow-strong: 0 0 24px 0 hsl(var(--accent) / 0.25);
   }
-
-  /* Nothing design is dark-first - no separate light theme needed */
 }
 
 @layer base {
@@ -77,54 +116,550 @@
     @apply border-border;
   }
 
+  html {
+    /* Enable font feature settings for better typography */
+    font-feature-settings: "tnum" 1, "kern" 1;
+  }
+
   body {
-    @apply bg-background text-foreground font-mono antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
     font-variant-numeric: tabular-nums;
+    /* Nothing precision - no font smoothing for sharp text */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
-  
-  /* Nothing Typography - Monospace precision */
+
+  /* Nothing Typography Hierarchy */
+  .font-mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
+  }
+
   .font-display {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    font-family: "Ndot47", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.01em;
+    font-weight: normal; /* Ndot47 is designed at normal weight */
+    text-transform: uppercase; /* Nothing-style caps for emphasis */
   }
-  
+
   .font-technical {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    font-family: "Ndot47", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
     font-variant-numeric: tabular-nums;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    font-size: var(--text-xs);
+  }
+
+  /* Nothing Typography Sizes with Proper Line Heights */
+  .text-micro {
+    font-size: var(--text-micro);
+    line-height: 1.2;
+  }
+  .text-xs {
+    font-size: var(--text-xs);
+    line-height: 1.3;
+  }
+  .text-sm {
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+  .text-base {
+    font-size: var(--text-base);
+    line-height: 1.5;
+  }
+  .text-lg {
+    font-size: var(--text-lg);
+    line-height: 1.5;
+  }
+  .text-xl {
+    font-size: var(--text-xl);
+    line-height: 1.4;
+  }
+  .text-2xl {
+    font-size: var(--text-2xl);
+    line-height: 1.3;
+  }
+  .text-3xl {
+    font-size: var(--text-3xl);
+    line-height: 1.2;
+  }
+  .text-4xl {
+    font-size: var(--text-4xl);
+    line-height: 1.1;
+  }
+  .text-5xl {
+    font-size: var(--text-5xl);
+    line-height: 1;
+  }
+  .text-6xl {
+    font-size: var(--text-6xl);
+    line-height: 0.9;
+  }
+  .text-7xl {
+    font-size: var(--text-7xl);
+    line-height: 0.9;
+  }
+  .text-8xl {
+    font-size: var(--text-8xl);
+    line-height: 0.9;
+  }
+  .text-9xl {
+    font-size: var(--text-9xl);
+    line-height: 0.9;
   }
 }
 
 @layer components {
-  /* Nothing Glass Effect */
+  /* Nothing Glass Effects - Ultra Subtle */
   .glass {
-    background: hsl(var(--glass));
+    background: hsl(var(--glass-subtle));
     border: 1px solid hsl(var(--border));
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px) saturate(180%);
   }
-  
-  /* Progress Ring Component */
+
+  .glass-medium {
+    background: hsl(var(--glass-medium));
+    border: 1px solid hsl(var(--border));
+    backdrop-filter: blur(12px) saturate(180%);
+  }
+
+  .glass-strong {
+    background: hsl(var(--glass-strong));
+    border: 1px solid hsl(var(--border));
+    backdrop-filter: blur(16px) saturate(180%);
+  }
+
+  /* Progress Ring - Nothing Style */
   .progress-ring {
     transform: rotate(-90deg);
-    filter: drop-shadow(0 0 8px hsl(var(--accent) / 0.3));
+    filter: drop-shadow(var(--shadow-glow));
+    transition: filter var(--duration-normal) var(--ease-out);
   }
-  
-  /* Metric Cards */
-  .metric-card {
-    @apply glass rounded-lg p-4 text-center;
+
+  .progress-ring.animate {
+    filter: drop-shadow(var(--shadow-glow-strong));
   }
-  
-  /* Step Counter Display */
+
+  /* Step Counter Display - Hero Typography */
   .step-display {
-    @apply font-display text-6xl md:text-7xl font-light tabular-nums;
-    line-height: 0.9;
+    font-family: "Ndot47", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
+    font-size: clamp(3rem, 12vw, 6rem);
+    line-height: 0.85;
+    font-weight: normal;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
   }
-  
-  /* Technical Labels */
+
+  /* Technical Labels - Nothing Precision */
   .tech-label {
-    @apply font-technical text-muted-foreground;
+    font-family: "Ndot47", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
+    color: hsl(var(--muted-foreground));
+    font-size: var(--text-xs);
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+  }
+
+  /* Metric Cards - Glass Morphism */
+  .metric-card {
+    @apply glass;
+    padding: var(--grid-12);
+    border-radius: var(--grid-2);
+    text-align: center;
+    transition: all var(--duration-normal) var(--ease-out);
+  }
+
+  .metric-card:hover {
+    @apply glass-medium;
+    transform: translateY(-1px);
+  }
+
+  /* Week Progress Bars - Minimal Design */
+  .week-bar {
+    height: var(--grid-2);
+    background: hsl(var(--progress-bg));
+    border-radius: var(--grid-1);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .week-bar-fill {
+    height: 100%;
+    background: hsl(var(--progress-fill));
+    transition: width var(--duration-slow) var(--ease-out);
+    border-radius: var(--grid-1);
+  }
+
+  .week-bar.today .week-bar-fill {
+    animation: pulse-glow 2s infinite;
+  }
+
+  /* Button Variants - Nothing Style */
+  .btn-nothing {
+    background: hsl(var(--glass-subtle));
+    border: 1px solid hsl(var(--border));
+    backdrop-filter: blur(8px) saturate(180%);
+    font-family: "Ndot47", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+      "Liberation Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: normal;
+    padding: var(--grid-8) var(--grid-16);
+    border-radius: var(--grid-1);
+    transition: all var(--duration-fast) var(--ease-out);
+    font-size: var(--text-xs);
+  }
+
+  .btn-nothing:hover {
+    border-color: hsl(var(--accent) / 0.4);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .btn-nothing:active {
+    transform: translateY(1px);
+  }
+
+  .btn-nothing.primary {
+    border-color: hsl(var(--accent));
+    color: hsl(var(--accent));
+  }
+
+  .btn-nothing.primary:hover {
+    background: hsl(var(--accent) / 0.1);
+    box-shadow: var(--shadow-glow-strong);
+  }
+
+  /* Status Indicators */
+  .status-dot {
+    width: var(--grid-2);
+    height: var(--grid-2);
+    border-radius: 50%;
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+
+  .status-dot.active {
+    background: hsl(var(--success));
+    animation: pulse-dot 2s infinite;
+  }
+
+  .status-dot.inactive {
+    background: hsl(var(--muted-foreground));
+  }
+
+  /* Input Fields - Nothing Style */
+  .input-nothing {
+    @apply glass font-mono;
+    padding: var(--grid-8) var(--grid-12);
+    border-radius: var(--grid-1);
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--glass-subtle));
+    font-variant-numeric: tabular-nums;
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+
+  .input-nothing:focus {
+    outline: none;
+    border-color: hsl(var(--accent));
+    box-shadow: 0 0 0 1px hsl(var(--accent) / 0.3);
+  }
+
+  /* Settings Panel - Enhanced Glass */
+  .settings-card {
+    @apply glass-medium;
+    padding: var(--grid-20);
+    border-radius: var(--grid-4);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Loading States */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-pulse 2s infinite;
+  }
+}
+
+@layer utilities {
+  /* Nothing Grid System */
+  .grid-1 {
+    width: var(--grid-1);
+    height: var(--grid-1);
+  }
+  .grid-2 {
+    width: var(--grid-2);
+    height: var(--grid-2);
+  }
+  .grid-4 {
+    width: var(--grid-4);
+    height: var(--grid-4);
+  }
+  .grid-8 {
+    width: var(--grid-8);
+    height: var(--grid-8);
+  }
+  .grid-12 {
+    width: var(--grid-12);
+    height: var(--grid-12);
+  }
+  .grid-16 {
+    width: var(--grid-16);
+    height: var(--grid-16);
+  }
+  .grid-20 {
+    width: var(--grid-20);
+    height: var(--grid-20);
+  }
+  .grid-24 {
+    width: var(--grid-24);
+    height: var(--grid-24);
+  }
+  .grid-32 {
+    width: var(--grid-32);
+    height: var(--grid-32);
+  }
+
+  /* Spacing utilities based on 8px grid */
+  .p-grid-4 {
+    padding: var(--grid-4);
+  }
+  .p-grid-8 {
+    padding: var(--grid-8);
+  }
+  .p-grid-12 {
+    padding: var(--grid-12);
+  }
+  .p-grid-16 {
+    padding: var(--grid-16);
+  }
+  .p-grid-20 {
+    padding: var(--grid-20);
+  }
+  .p-grid-24 {
+    padding: var(--grid-24);
+  }
+
+  .m-grid-4 {
+    margin: var(--grid-4);
+  }
+  .m-grid-8 {
+    margin: var(--grid-8);
+  }
+  .m-grid-12 {
+    margin: var(--grid-12);
+  }
+  .m-grid-16 {
+    margin: var(--grid-16);
+  }
+  .m-grid-20 {
+    margin: var(--grid-20);
+  }
+  .m-grid-24 {
+    margin: var(--grid-24);
+  }
+
+  /* Animation utilities */
+  .animate-slow {
+    animation-duration: var(--duration-slow);
+  }
+  .animate-normal {
+    animation-duration: var(--duration-normal);
+  }
+  .animate-fast {
+    animation-duration: var(--duration-fast);
+  }
+
+  /* Transition utilities */
+  .transition-nothing {
+    transition: all var(--duration-normal) var(--ease-out);
+  }
+  .transition-fast {
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+  .transition-slow {
+    transition: all var(--duration-slow) var(--ease-out);
+  }
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px hsl(var(--accent) / 0.2);
+  }
+  50% {
+    box-shadow: 0 0 16px hsl(var(--accent) / 0.4);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design - Mobile First */
+@media (max-width: 640px) {
+  .step-display {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+
+  .metric-card {
+    padding: var(--grid-8);
+  }
+
+  .settings-card {
+    padding: var(--grid-16);
+  }
+}
+
+/* Additional Nothing-style Animations */
+@keyframes pulse-subtle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes milestone {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.05);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  75% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 1.5s ease-in-out infinite;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+.animate-milestone {
+  animation: milestone 2s ease-in-out;
+}
+
+/* Nothing-specific responsive design */
+@media (min-width: 768px) {
+  .step-display {
+    font-size: clamp(4rem, 8vw, 7rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .step-display {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+
+  .metric-card {
+    padding: var(--grid-8);
+  }
+
+  .settings-card {
+    padding: var(--grid-16);
+  }
+
+  /* Mobile-specific optimizations */
+  .btn-nothing {
+    padding: var(--grid-6) var(--grid-12);
+    font-size: var(--text-micro);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --accent: 0 100% 60%;
+    --border: 0 0% 20%;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
