@@ -3,9 +3,23 @@
  * Display walking pace, calorie estimation, distance tracking, and activity analysis
  */
 
-import React, { useState, useEffect } from 'react';
-import { Activity, Zap, MapPin, Clock, TrendingUp, TrendingDown, Minus, User } from 'lucide-react';
-import { HealthInsightsEngine, UserProfile, HealthInsight, HealthMetrics } from '../lib/healthInsights';
+import React, { useState, useEffect } from "react";
+import {
+  Activity,
+  Zap,
+  MapPin,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  User,
+} from "lucide-react";
+import {
+  HealthInsightsEngine,
+  UserProfile,
+  HealthInsight,
+  HealthMetrics,
+} from "../lib/healthInsights";
 
 interface HealthInsightsProps {
   currentSteps: number;
@@ -20,32 +34,39 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
   currentDistance,
   currentCalories,
   userProfile,
-  onProfileUpdate
+  onProfileUpdate,
 }) => {
-  const [healthEngine, setHealthEngine] = useState<HealthInsightsEngine | null>(null);
+  const [healthEngine, setHealthEngine] = useState<HealthInsightsEngine | null>(
+    null
+  );
   const [insights, setInsights] = useState<HealthInsight[]>([]);
-  const [currentMetrics, setCurrentMetrics] = useState<HealthMetrics | null>(null);
+  const [currentMetrics, setCurrentMetrics] = useState<HealthMetrics | null>(
+    null
+  );
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [profileForm, setProfileForm] = useState<UserProfile>({
     weight: 70,
     height: 170,
     age: 30,
-    gender: 'other'
+    gender: "other",
   });
 
   useEffect(() => {
     if (userProfile) {
       const engine = new HealthInsightsEngine(userProfile);
       setHealthEngine(engine);
-      
+
       // Generate sample activity data for demonstration
       const sampleData = generateSampleActivityData(currentSteps);
       const metrics = engine.processDailyActivity(sampleData);
       setCurrentMetrics(metrics);
-      
+
       // Generate sample historical data for insights
       const historicalMetrics = generateHistoricalMetrics(engine, 7);
-      const generatedInsights = engine.generateHealthInsights([...historicalMetrics, metrics]);
+      const generatedInsights = engine.generateHealthInsights([
+        ...historicalMetrics,
+        metrics,
+      ]);
       setInsights(generatedInsights);
     }
   }, [userProfile, currentSteps]);
@@ -53,37 +74,49 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
   const generateSampleActivityData = (totalSteps: number) => {
     const data = [];
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0);
-    
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      6,
+      0,
+      0
+    );
+
     // Generate step progression throughout the day
     for (let i = 0; i <= 12; i++) {
       const time = new Date(startOfDay.getTime() + i * 60 * 60 * 1000); // Every hour
       const progress = Math.min(1, i / 12);
-      const steps = Math.round(totalSteps * progress * (0.8 + Math.random() * 0.4));
-      
+      const steps = Math.round(
+        totalSteps * progress * (0.8 + Math.random() * 0.4)
+      );
+
       data.push({
         steps: Math.max(0, steps),
-        timestamp: time
+        timestamp: time,
       });
     }
-    
+
     return data;
   };
 
-  const generateHistoricalMetrics = (engine: HealthInsightsEngine, days: number): HealthMetrics[] => {
+  const generateHistoricalMetrics = (
+    engine: HealthInsightsEngine,
+    days: number
+  ): HealthMetrics[] => {
     const metrics: HealthMetrics[] = [];
-    
+
     for (let i = days; i > 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      
+
       const baseSteps = 7000 + Math.random() * 6000;
       const sampleData = generateSampleActivityData(baseSteps);
       const dayMetrics = engine.processDailyActivity(sampleData);
-      
+
       metrics.push(dayMetrics);
     }
-    
+
     return metrics;
   };
 
@@ -96,32 +129,48 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
 
   const getInsightIcon = (category: string) => {
     switch (category) {
-      case 'pace': return <Activity className="w-4 h-4" />;
-      case 'calories': return <Zap className="w-4 h-4" />;
-      case 'distance': return <MapPin className="w-4 h-4" />;
-      case 'activity': return <Clock className="w-4 h-4" />;
-      case 'efficiency': return <TrendingUp className="w-4 h-4" />;
-      default: return <Activity className="w-4 h-4" />;
+      case "pace":
+        return <Activity className="w-4 h-4" />;
+      case "calories":
+        return <Zap className="w-4 h-4" />;
+      case "distance":
+        return <MapPin className="w-4 h-4" />;
+      case "activity":
+        return <Clock className="w-4 h-4" />;
+      case "efficiency":
+        return <TrendingUp className="w-4 h-4" />;
+      default:
+        return <Activity className="w-4 h-4" />;
     }
   };
 
   const getTrendIcon = (trend?: string) => {
     switch (trend) {
-      case 'improving': return <TrendingUp className="w-3 h-3 text-success" />;
-      case 'declining': return <TrendingDown className="w-3 h-3 text-destructive" />;
-      case 'stable': return <Minus className="w-3 h-3 text-muted-foreground" />;
-      default: return null;
+      case "improving":
+        return <TrendingUp className="w-3 h-3 text-success" />;
+      case "declining":
+        return <TrendingDown className="w-3 h-3 text-destructive" />;
+      case "stable":
+        return <Minus className="w-3 h-3 text-muted-foreground" />;
+      default:
+        return null;
     }
   };
 
   const getInsightColor = (category: string) => {
     switch (category) {
-      case 'pace': return 'text-blue-400';
-      case 'calories': return 'text-orange-400';
-      case 'distance': return 'text-green-400';
-      case 'activity': return 'text-purple-400';
-      case 'efficiency': return 'text-accent';
-      default: return 'text-muted-foreground';
+      case "pace":
+        return "text-blue-400";
+      case "calories":
+        return "text-orange-400";
+      case "distance":
+        return "text-green-400";
+      case "activity":
+        return "text-purple-400";
+      case "efficiency":
+        return "text-accent";
+      default:
+        return "text-muted-foreground";
     }
   };
 
@@ -148,14 +197,19 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
             <div className="glass-strong p-6 max-w-md w-full">
               <div className="tech-label text-accent mb-4">PROFILE SETUP</div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="tech-label block mb-2">Weight (kg)</label>
                   <input
                     type="number"
                     value={profileForm.weight}
-                    onChange={(e) => setProfileForm(prev => ({ ...prev, weight: Number(e.target.value) }))}
+                    onChange={(e) =>
+                      setProfileForm((prev) => ({
+                        ...prev,
+                        weight: Number(e.target.value),
+                      }))
+                    }
                     className="input-nothing w-full"
                     min="30"
                     max="200"
@@ -167,7 +221,12 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
                   <input
                     type="number"
                     value={profileForm.height}
-                    onChange={(e) => setProfileForm(prev => ({ ...prev, height: Number(e.target.value) }))}
+                    onChange={(e) =>
+                      setProfileForm((prev) => ({
+                        ...prev,
+                        height: Number(e.target.value),
+                      }))
+                    }
                     className="input-nothing w-full"
                     min="100"
                     max="250"
@@ -179,7 +238,12 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
                   <input
                     type="number"
                     value={profileForm.age}
-                    onChange={(e) => setProfileForm(prev => ({ ...prev, age: Number(e.target.value) }))}
+                    onChange={(e) =>
+                      setProfileForm((prev) => ({
+                        ...prev,
+                        age: Number(e.target.value),
+                      }))
+                    }
                     className="input-nothing w-full"
                     min="13"
                     max="120"
@@ -190,7 +254,12 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
                   <label className="tech-label block mb-2">Gender</label>
                   <select
                     value={profileForm.gender}
-                    onChange={(e) => setProfileForm(prev => ({ ...prev, gender: e.target.value as any }))}
+                    onChange={(e) =>
+                      setProfileForm((prev) => ({
+                        ...prev,
+                        gender: e.target.value as any,
+                      }))
+                    }
                     className="input-nothing w-full"
                   >
                     <option value="male">Male</option>
@@ -227,7 +296,7 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
       {currentMetrics && (
         <div className="space-y-4">
           <div className="tech-label text-accent">TODAY'S HEALTH METRICS</div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="glass p-4 text-center">
               <div className="text-blue-400 mb-2">
@@ -281,17 +350,25 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
               </div>
               <div className="text-right">
                 <div className="text-sm text-muted-foreground font-mono">
-                  {currentMetrics.walkingEfficiency > 0.8 ? 'Excellent' :
-                   currentMetrics.walkingEfficiency > 0.6 ? 'Good' :
-                   currentMetrics.walkingEfficiency > 0.4 ? 'Fair' : 'Needs Improvement'}
+                  {currentMetrics.walkingEfficiency > 0.8
+                    ? "Excellent"
+                    : currentMetrics.walkingEfficiency > 0.6
+                    ? "Good"
+                    : currentMetrics.walkingEfficiency > 0.4
+                    ? "Fair"
+                    : "Needs Improvement"}
                 </div>
               </div>
             </div>
-            
+
             <div className="week-bar mt-3">
-              <div 
-                className="week-bar-fill" 
-                style={{ width: `${Math.round(currentMetrics.walkingEfficiency * 100)}%` }}
+              <div
+                className="week-bar-fill"
+                style={{
+                  width: `${Math.round(
+                    currentMetrics.walkingEfficiency * 100
+                  )}%`,
+                }}
               />
             </div>
           </div>
@@ -311,7 +388,9 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-technical text-sm">{insight.title}</span>
+                      <span className="font-technical text-sm">
+                        {insight.title}
+                      </span>
                       {getTrendIcon(insight.trend)}
                     </div>
                     <div className="font-display text-sm">
@@ -358,14 +437,19 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="glass-strong p-6 max-w-md w-full">
             <div className="tech-label text-accent mb-4">EDIT PROFILE</div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="tech-label block mb-2">Weight (kg)</label>
                 <input
                   type="number"
                   value={profileForm.weight}
-                  onChange={(e) => setProfileForm(prev => ({ ...prev, weight: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      weight: Number(e.target.value),
+                    }))
+                  }
                   className="input-nothing w-full"
                   min="30"
                   max="200"
@@ -377,7 +461,12 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
                 <input
                   type="number"
                   value={profileForm.height}
-                  onChange={(e) => setProfileForm(prev => ({ ...prev, height: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      height: Number(e.target.value),
+                    }))
+                  }
                   className="input-nothing w-full"
                   min="100"
                   max="250"
@@ -389,7 +478,12 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
                 <input
                   type="number"
                   value={profileForm.age}
-                  onChange={(e) => setProfileForm(prev => ({ ...prev, age: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      age: Number(e.target.value),
+                    }))
+                  }
                   className="input-nothing w-full"
                   min="13"
                   max="120"
@@ -400,7 +494,12 @@ const HealthInsights: React.FC<HealthInsightsProps> = ({
                 <label className="tech-label block mb-2">Gender</label>
                 <select
                   value={profileForm.gender}
-                  onChange={(e) => setProfileForm(prev => ({ ...prev, gender: e.target.value as any }))}
+                  onChange={(e) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      gender: e.target.value as any,
+                    }))
+                  }
                   className="input-nothing w-full"
                 >
                   <option value="male">Male</option>
