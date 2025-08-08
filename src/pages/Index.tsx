@@ -79,13 +79,7 @@ const Index = () => {
           settings={settings}
           onSettingsChange={updateSettings}
           onExportData={exportData}
-          onImportData={async (data) => {
-            try {
-              return await importData(data);
-            } catch {
-              return false;
-            }
-          }}
+          onImportData={importData}
           batteryOptimized={batteryOptimized}
           sensorSupported={sensorSupported}
         />

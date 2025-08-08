@@ -27,7 +27,7 @@ interface SettingsProps {
   settings: UserSettings;
   onSettingsChange: (newSettings: Partial<UserSettings>) => void;
   onExportData: () => string;
-  onImportData: (data: string) => boolean;
+  onImportData: (data: string) => Promise<boolean>;
   calibrationData?: {
     currentThreshold: number;
     sensitivity: number;
@@ -88,9 +88,9 @@ export const SettingsPanel = ({
     URL.revokeObjectURL(url);
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (importData.trim()) {
-      const success = onImportData(importData.trim());
+      const success = await onImportData(importData.trim());
       if (success) {
         setImportData("");
         alert("Data imported successfully!");

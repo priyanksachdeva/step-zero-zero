@@ -348,7 +348,11 @@ export const usePedometer = () => {
 
     // Data management
     exportData: () => dataManagerRef.current?.exportUserData() || "",
-    importData: (jsonData: string) =>
-      dataManagerRef.current?.importUserData(jsonData) || false,
+    importData: async (jsonData: string): Promise<boolean> => {
+      if (dataManagerRef.current) {
+        return await dataManagerRef.current.importUserData(jsonData);
+      }
+      return false;
+    },
   };
 };

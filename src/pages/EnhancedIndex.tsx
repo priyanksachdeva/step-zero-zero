@@ -873,14 +873,7 @@ const EnhancedIndex = () => {
                   settings={settings}
                   onSettingsChange={updateSettings}
                   onExportData={exportData}
-                  onImportData={(data) => {
-                    try {
-                      const result = importData(data);
-                      return typeof result === "boolean" ? result : false;
-                    } catch {
-                      return false;
-                    }
-                  }}
+                  onImportData={importData}
                   batteryOptimized={batteryOptimized}
                   sensorSupported={sensorSupported}
                 />
