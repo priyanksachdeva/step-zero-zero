@@ -8,9 +8,24 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve": "serve dist -s -l 3000",
+    "mobile:setup": "npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios && npx cap init \"Nothing Health\" \"com.nothing.health\" --web-dir=dist",
+    "mobile:add": "npx cap add android && npx cap add ios",
+    "mobile:build": "npm run build && npx cap copy",
+    "mobile:android": "npx cap open android",
+    "mobile:ios": "npx cap open ios",
+    "mobile:sync": "npx cap sync"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.2",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/cli": "^7.4.2",
+    "@capacitor/core": "^7.4.2",
+    "@capacitor/device": "^7.0.2",
+    "@capacitor/haptics": "^7.0.2",
+    "@capacitor/ios": "^7.4.2",
+    "@capacitor/motion": "^7.0.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -59,6 +74,8 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
+    "vite-plugin-pwa": "^1.0.2",
+    "workbox-window": "^7.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

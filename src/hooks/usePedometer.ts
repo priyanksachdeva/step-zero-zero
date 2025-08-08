@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { AdvancedStepDetector } from "@/lib/stepDetection";
 import { BatteryOptimizedSensorManager } from "@/lib/sensorManager";
 import { DataPersistenceManager } from "@/lib/dataPersistence";
+import { nativeSensorManager, NativeMotionData } from "@/lib/nativeSensors";
 
 export const usePedometer = () => {
   // Core managers
@@ -126,6 +127,60 @@ export const usePedometer = () => {
     [currentSteps]
   );
 
+  // Start tracking with native sensors
+  const startNativeTracking = useCallback(async () => {
+    try {
+      // Check if we're on a native platform
+      const isNative = nativeSensorManager.isNativePlatform();
+      console.log("Platform check:", isNative ? "Native" : "Web");
+
+      // Provide haptic feedback
+      await nativeSensorManager.vibrate("light");
+
+      // Start motion monitoring with native sensors
+      const success = await nativeSensorManager.startMotionMonitoring(
+        (motionData: NativeMotionData) => {
+          if (!stepDetectorRef.current) return;
+
+          // Convert native motion data to our format
+          const accelerometerData = {
+            x: motionData.accelerationIncludingGravity.x,
+            y: motionData.accelerationIncludingGravity.y,
+            z: motionData.accelerationIncludingGravity.z,
+            timestamp: Date.now(),
+          };
+
+          // Process with step detector
+          const stepDetected =
+            stepDetectorRef.current.processAccelerometerData(accelerometerData);
+
+          if (stepDetected) {
+            const newStepCount = stepDetectorRef.current.getStepCount();
+            handleStepDetected(newStepCount);
+
+            // Provide haptic feedback for step
+            nativeSensorManager.vibrate("light");
+          }
+        }
+      );
+
+      if (success) {
+        setIsTracking(true);
+        setSensorSupported(true);
+        setPermissionGranted(true);
+        console.log("Native step tracking started successfully");
+        return true;
+      } else {
+        // Fallback to regular tracking
+        return startTracking();
+      }
+    } catch (error) {
+      console.error("Failed to start native tracking:", error);
+      // Fallback to regular tracking
+      return startTracking();
+    }
+  }, [handleStepDetected]);
+
   // Start tracking
   const startTracking = useCallback(async () => {
     if (!sensorManagerRef.current) return false;
@@ -155,23 +210,29 @@ export const usePedometer = () => {
 
   // Stop tracking
   const stopTracking = useCallback(() => {
-    if (!sensorManagerRef.current) return;
+    // Stop native sensors
+    nativeSensorManager.stopMotionMonitoring();
 
-    sensorManagerRef.current.stopMonitoring();
+    // Stop regular sensors
+    if (sensorManagerRef.current) {
+      sensorManagerRef.current.stopMonitoring();
+    }
+
     setIsTracking(false);
 
     // Save data when stopping
     saveTodayData();
   }, [saveTodayData]);
 
-  // Toggle tracking
+  // Toggle tracking with native support
   const toggleTracking = useCallback(async () => {
     if (isTracking) {
       stopTracking();
     } else {
-      await startTracking();
+      // Try native tracking first, fallback to regular tracking
+      await startNativeTracking();
     }
-  }, [isTracking, startTracking, stopTracking]);
+  }, [isTracking, startNativeTracking, stopTracking]);
 
   // Reset daily steps
   const resetDailySteps = useCallback(() => {

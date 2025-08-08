@@ -1,0 +1,6 @@
+{
+  "name": "serve-pwa",
+  "scripts": {
+    "serve": "npx serve dist -s -l 3000"
+  }
+}

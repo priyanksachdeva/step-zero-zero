@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas192" width="192" height="192" style="border: 1px solid black;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="border: 1px solid black;"></canvas>
+    
+    <script>
+        // Generate 192x192 icon
+        const canvas192 = document.getElementById('canvas192');
+        const ctx192 = canvas192.getContext('2d');
+        
+        // Black background with rounded corners
+        ctx192.fillStyle = '#000000';
+        ctx192.fillRect(0, 0, 192, 192);
+        
+        // Red circle
+        ctx192.strokeStyle = '#FF0000';
+        ctx192.lineWidth = 8;
+        ctx192.beginPath();
+        ctx192.arc(96, 96, 60, 0, 2 * Math.PI);
+        ctx192.stroke();
+        
+        // Clock hands
+        ctx192.strokeStyle = '#FF0000';
+        ctx192.lineWidth = 6;
+        ctx192.lineCap = 'round';
+        ctx192.beginPath();
+        ctx192.moveTo(96, 96);
+        ctx192.lineTo(96, 56);
+        ctx192.moveTo(96, 96);
+        ctx192.lineTo(126, 96);
+        ctx192.stroke();
+        
+        // Text
+        ctx192.fillStyle = '#FFFFFF';
+        ctx192.font = 'bold 20px Arial';
+        ctx192.textAlign = 'center';
+        ctx192.fillText('NOTHING', 96, 150);
+        
+        ctx192.fillStyle = '#FF0000';
+        ctx192.font = '16px Arial';
+        ctx192.fillText('HEALTH', 96, 170);
+        
+        // Generate 512x512 icon (scaled version)
+        const canvas512 = document.getElementById('canvas512');
+        const ctx512 = canvas512.getContext('2d');
+        
+        ctx512.fillStyle = '#000000';
+        ctx512.fillRect(0, 0, 512, 512);
+        
+        ctx512.strokeStyle = '#FF0000';
+        ctx512.lineWidth = 20;
+        ctx512.beginPath();
+        ctx512.arc(256, 256, 160, 0, 2 * Math.PI);
+        ctx512.stroke();
+        
+        ctx512.strokeStyle = '#FF0000';
+        ctx512.lineWidth = 16;
+        ctx512.lineCap = 'round';
+        ctx512.beginPath();
+        ctx512.moveTo(256, 256);
+        ctx512.lineTo(256, 146);
+        ctx512.moveTo(256, 256);
+        ctx512.lineTo(336, 256);
+        ctx512.stroke();
+        
+        ctx512.fillStyle = '#FFFFFF';
+        ctx512.font = 'bold 52px Arial';
+        ctx512.textAlign = 'center';
+        ctx512.fillText('NOTHING', 256, 400);
+        
+        ctx512.fillStyle = '#FF0000';
+        ctx512.font = '42px Arial';
+        ctx512.fillText('HEALTH', 256, 450);
+        
+        // Download function
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Auto download after 1 second
+        setTimeout(() => {
+            downloadCanvas(canvas192, 'pwa-192x192.png');
+            setTimeout(() => {
+                downloadCanvas(canvas512, 'pwa-512x512.png');
+            }, 500);
+        }, 1000);
+    </script>
+</body>
+</html>

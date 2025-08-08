@@ -16,6 +16,8 @@ import SleepDashboard from "@/components/SleepDashboard";
 import StressWellnessDashboard from "@/components/StressWellnessDashboard";
 import HydrationDashboard from "@/components/HydrationDashboard";
 import NutritionDashboard from "@/components/NutritionDashboard";
+import PWAInstallButton from "@/components/PWAInstallButton";
+import { DebugPanel } from "@/components/DebugPanel";
 import { usePedometer } from "@/hooks/usePedometer";
 import { Button } from "@/components/ui/button";
 import {
@@ -754,6 +756,9 @@ const EnhancedIndex = () => {
                 </div>
               </div>
             </div>
+
+            {/* Debug Panel for Step Detection */}
+            <DebugPanel />
           </div>
         );
     }
@@ -762,8 +767,11 @@ const EnhancedIndex = () => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background text-foreground">
-        {/* Mobile-optimized Container for 320px width */}
-        <div className="w-full max-w-[320px] mx-auto">
+        {/* PWA Install Button */}
+        <PWAInstallButton />
+
+        {/* Mobile-optimized Container - Responsive for all phone sizes */}
+        <div className="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto px-2 sm:px-4">
           {/* Enhanced Header - Mobile optimized with better UX */}
           <div className="px-3 py-3 border-b border-border/20 bg-background/95 backdrop-blur-sm">
             <div className="flex justify-between items-center">
@@ -801,14 +809,14 @@ const EnhancedIndex = () => {
             </div>
           </div>
 
-          {/* Tab Content - Optimized for mobile viewport */}
-          <div className="px-3 py-3 pb-20 min-h-[calc(737px-120px)] overflow-y-auto">
+          {/* Tab Content - Responsive mobile viewport */}
+          <div className="px-3 py-3 pb-20 min-h-[calc(100vh-120px)] overflow-y-auto">
             {renderTabContent()}
           </div>
 
-          {/* Enhanced Bottom Navigation - Mobile-optimized with better UX */}
+          {/* Enhanced Bottom Navigation - Responsive mobile-optimized */}
           <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg">
-            <div className="w-full max-w-[320px] mx-auto">
+            <div className="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto px-2 sm:px-4">
               <div className="grid grid-cols-4 px-1 py-1">
                 <TabButton
                   id="home"
