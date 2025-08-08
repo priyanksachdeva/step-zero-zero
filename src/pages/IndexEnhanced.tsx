@@ -14,7 +14,7 @@ import {
   Activity,
   Target,
   Zap,
-} from "lucide-react";
+} from "@/components/icons/NothingIcon";
 import { useState, useEffect } from "react";
 
 const Index = () => {

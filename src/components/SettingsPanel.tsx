@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Download, Upload, Battery, Smartphone } from "lucide-react";
+import { Settings, Download, Upload, Battery, Smartphone } from "@/components/icons/NothingIcon";
 
 interface UserSettings {
   dailyGoal: number;

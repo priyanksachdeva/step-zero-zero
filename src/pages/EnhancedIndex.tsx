@@ -57,7 +57,7 @@ import {
   User,
   CheckCircle,
   Info,
-} from "lucide-react";
+} from "@/components/icons/NothingIcon";
 import { useState, useEffect } from "react";
 import { UserProfile } from "@/lib/healthInsights";
 

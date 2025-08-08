@@ -5,7 +5,7 @@ import { WeekProgress } from "@/components/WeekProgress";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { usePedometer } from "@/hooks/usePedometer";
 import { Button } from "@/components/ui/button";
-import {
+import { 
   Play,
   Pause,
   RotateCcw,
@@ -14,7 +14,7 @@ import {
   Activity,
   Target,
   Zap,
-} from "lucide-react";
+} from "@/components/icons/NothingIcon";
 import { useState, useEffect } from "react";
 
 const Index = () => {
