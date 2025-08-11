@@ -1,0 +1,1 @@
+ativeSensors2.ts is deprecated and replaced by nativeSensors.ts. Safe to delete nativeSensors2.ts now.

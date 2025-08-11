@@ -32,6 +32,7 @@ export class BatteryOptimizedSensorManager {
   private motionBuffer: AccelerometerData[] = [];
   private stepCountCallback?: (steps: number) => void;
   private onlineStatusCallback?: (online: boolean) => void;
+  private motionListener?: (event: DeviceMotionEvent) => void; // store actual listener for proper removal
 
   constructor(
     stepDetector: AdvancedStepDetector,
@@ -94,8 +95,11 @@ export class BatteryOptimizedSensorManager {
   stopMonitoring(): void {
     this.isListening = false;
 
-    // Remove event listener
-    window.removeEventListener("devicemotion", this.handleDeviceMotion);
+    // Remove correct event listener
+    if (this.motionListener) {
+      window.removeEventListener("devicemotion", this.motionListener);
+      this.motionListener = undefined;
+    }
 
     // Clear timers
     if (this.idleTimer) {
@@ -116,39 +120,55 @@ export class BatteryOptimizedSensorManager {
     // Calculate throttle interval based on desired sample rate
     const throttleInterval = 1000 / this.config.sampleRate;
     let lastProcessTime = 0;
+    // Simple low-pass gravity estimate
+    let gravity = { x: 0, y: 0, z: 0 };
+    const alpha = 0.8; // gravity smoothing factor
 
-    const handleMotion = (event: DeviceMotionEvent) => {
+    this.motionListener = (event: DeviceMotionEvent) => {
       const now = Date.now();
-
-      // Throttle to desired sample rate
-      if (now - lastProcessTime < throttleInterval) {
-        return;
-      }
+      if (now - lastProcessTime < throttleInterval) return;
       lastProcessTime = now;
 
-      // Skip if in sleep mode and no significant motion
-      if (this.isIdle && this.config.enableSleepMode) {
-        const acceleration = event.accelerationIncludingGravity;
-        if (!acceleration) return;
+      const accG = event.accelerationIncludingGravity;
+      const acc = event.acceleration; // linear acceleration if provided
+      if (!accG && !acc) return;
 
+      // If idle mode, quick wake check
+      if (this.isIdle && this.config.enableSleepMode && accG) {
         const magnitude = Math.sqrt(
-          (acceleration.x || 0) ** 2 +
-            (acceleration.y || 0) ** 2 +
-            (acceleration.z || 0) ** 2
+          (accG.x || 0) ** 2 + (accG.y || 0) ** 2 + (accG.z || 0) ** 2
         );
-
-        // Only wake up if significant motion detected
-        if (magnitude < 1.5) return;
-
+        if (magnitude < 1.5) return; // still idle
         this.wakeFromIdle();
       }
 
-      this.handleDeviceMotion(event);
+      // Prefer linear acceleration if available; else derive by removing gravity
+      let x: number, y: number, z: number;
+      if (acc && (acc.x !== null || acc.y !== null || acc.z !== null)) {
+        x = acc.x || 0;
+        y = acc.y || 0;
+        z = acc.z || 0;
+      } else if (accG) {
+        // Update gravity estimate
+        gravity.x = alpha * gravity.x + (1 - alpha) * (accG.x || 0);
+        gravity.y = alpha * gravity.y + (1 - alpha) * (accG.y || 0);
+        gravity.z = alpha * gravity.z + (1 - alpha) * (accG.z || 0);
+        x = (accG.x || 0) - gravity.x;
+        y = (accG.y || 0) - gravity.y;
+        z = (accG.z || 0) - gravity.z;
+      } else {
+        return;
+      }
+
+      const data: AccelerometerData = { x, y, z, timestamp: now };
+      this.motionBuffer.push(data);
+      this.lastMotionTime = now;
+      if (this.motionBuffer.length > 200) this.motionBuffer.shift();
     };
 
-    // Bind the handler and start listening
-    this.handleDeviceMotion = this.handleDeviceMotion.bind(this);
-    window.addEventListener("devicemotion", handleMotion, { passive: true });
+    window.addEventListener("devicemotion", this.motionListener, {
+      passive: true,
+    });
   }
 
   /**

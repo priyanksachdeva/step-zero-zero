@@ -9,16 +9,18 @@ interface ProgressRingProps {
   children?: React.ReactNode;
   animated?: boolean;
   showPercentage?: boolean;
+  adaptive?: boolean; // new flag
 }
 
 export const ProgressRing = ({
   progress,
-  size = 240,
-  strokeWidth = 12,
+  size = 200,
+  strokeWidth = 8,
   className,
   children,
   animated = true,
   showPercentage = false,
+  adaptive = false,
 }: ProgressRingProps) => {
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
@@ -45,21 +47,19 @@ export const ProgressRing = ({
     }
   }, [progress, isComplete]);
 
+  const dimension = adaptive ? undefined : size;
   const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const strokeDasharray = `${circumference} ${circumference}`;
-  const strokeDashoffset = circumference - animatedProgress * circumference;
-
-  // Calculate segments for Nothing-style discrete progress
-  const totalSegments = 60; // 60 segments for minute-like precision
-  const activeSegments = Math.floor(animatedProgress * totalSegments);
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - progress * circumference;
 
   return (
     <div
       className={cn(
         "relative inline-flex items-center justify-center transition-nothing",
+        adaptive && "w-[clamp(200px,70vw,320px)] h-[clamp(200px,70vw,320px)]",
         className
       )}
+      style={!adaptive ? { width: dimension, height: dimension } : undefined}
     >
       {/* Main SVG Ring */}
       <svg
@@ -67,9 +67,11 @@ export const ProgressRing = ({
           "progress-ring transition-nothing",
           isComplete && "animate"
         )}
-        width={size}
-        height={size}
+        width={adaptive ? undefined : size}
+        height={adaptive ? undefined : size}
         viewBox={`0 0 ${size} ${size}`}
+        role="img"
+        aria-label={`Progress ${Math.round(progress * 100)}%`}
       >
         {/* Outer glow ring for achievement */}
         {isComplete && (
@@ -95,8 +97,8 @@ export const ProgressRing = ({
           fill="transparent"
           stroke="hsl(var(--progress-bg))"
           strokeWidth={strokeWidth}
-          strokeDasharray={`${(circumference / totalSegments) * 0.8} ${
-            (circumference / totalSegments) * 0.2
+          strokeDasharray={`${(circumference / 60) * 0.8} ${
+            (circumference / 60) * 0.2
           }`}
           className="opacity-25"
         />
@@ -109,8 +111,8 @@ export const ProgressRing = ({
           fill="transparent"
           stroke={isComplete ? "hsl(var(--success))" : "hsl(var(--accent))"}
           strokeWidth={strokeWidth}
-          strokeDasharray={strokeDasharray}
-          strokeDashoffset={strokeDashoffset}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
           strokeLinecap="round"
           className="transition-all duration-slow"
           style={{
@@ -123,27 +125,25 @@ export const ProgressRing = ({
         />
 
         {/* Progress markers - Nothing style discrete indicators */}
-        {Array.from({ length: Math.min(activeSegments, totalSegments) }).map(
-          (_, i) => {
-            const angle = (i / totalSegments) * 360 - 90; // Start from top
-            const markerRadius = radius - strokeWidth / 4;
-            const x =
-              size / 2 + markerRadius * Math.cos((angle * Math.PI) / 180);
-            const y =
-              size / 2 + markerRadius * Math.sin((angle * Math.PI) / 180);
+        {Array.from({
+          length: Math.min(Math.floor(animatedProgress * 60), 60),
+        }).map((_, i) => {
+          const angle = (i / 60) * 360 - 90; // Start from top
+          const markerRadius = radius - strokeWidth / 4;
+          const x = size / 2 + markerRadius * Math.cos((angle * Math.PI) / 180);
+          const y = size / 2 + markerRadius * Math.sin((angle * Math.PI) / 180);
 
-            return (
-              <circle
-                key={i}
-                cx={x}
-                cy={y}
-                r={1}
-                fill={isComplete ? "hsl(var(--success))" : "hsl(var(--accent))"}
-                className="opacity-60"
-              />
-            );
-          }
-        )}
+          return (
+            <circle
+              key={i}
+              cx={x}
+              cy={y}
+              r={1}
+              fill={isComplete ? "hsl(var(--success))" : "hsl(var(--accent))"}
+              className="opacity-60"
+            />
+          );
+        })}
 
         {/* Achievement celebration ring */}
         {isComplete && (

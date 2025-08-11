@@ -202,6 +202,26 @@ export class AdvancedStepDetector {
       stepCount: this.stepCount,
     };
   }
+
+  /**
+   * Restore calibration data (threshold, activity history)
+   */
+  restoreCalibration(data: {
+    currentThreshold: number;
+    averageActivity: number;
+  }): void {
+    if (
+      data.currentThreshold &&
+      data.currentThreshold > 0.5 &&
+      data.currentThreshold < 5
+    ) {
+      this.threshold = data.currentThreshold;
+    }
+    if (data.averageActivity && data.averageActivity > 0) {
+      // Seed activity history with average value to stabilize early threshold
+      this.userActivityHistory = Array(50).fill(data.averageActivity);
+    }
+  }
 }
 
 /**

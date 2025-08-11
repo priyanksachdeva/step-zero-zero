@@ -5,6 +5,13 @@
 
 import { Device } from "@capacitor/device";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { Motion } from "@capacitor/motion";
+import { Capacitor } from "@capacitor/core";
+import { registerPlugin } from "@capacitor/core";
+
+// polling state for native step service
+let servicePollingInterval: ReturnType<typeof setInterval> | null = null;
+let lastNativeSteps = 0;
 
 export interface NativeMotionData {
   accelerationIncludingGravity: {
@@ -25,11 +32,27 @@ export interface NativeMotionData {
   interval: number;
 }
 
+// Capacitor plugin interface
+interface StepServicePlugin {
+  startService(): Promise<{ started: boolean }>;
+  stopService(): Promise<{ stopped: boolean }>;
+  getStepCount(): Promise<{ steps: number }>;
+}
+
+const StepService = registerPlugin<StepServicePlugin>("StepService", {});
+
 export class NativeSensorManager {
   private isNative: boolean = false;
   private motionListeners: Array<(data: NativeMotionData) => void> = [];
   private isListening: boolean = false;
   private motionHandler: ((event: DeviceMotionEvent) => void) | null = null;
+  private usingCapacitorMotion: boolean = false;
+  private accelListener: any = null;
+  private lastEventTimestamp: number = 0;
+  private sampleIntervalMs = 50; // ~20Hz default
+  private lastDispatch = 0;
+  private gravity = { x: 0, y: 0, z: 0 };
+  private readonly gravityAlpha = 0.8; // low‑pass filter factor
 
   constructor() {
     this.checkPlatform();
@@ -115,100 +138,155 @@ export class NativeSensorManager {
 
     this.motionListeners.push(callback);
 
+    // Try Capacitor Motion plugin first on native
+    if (this.isNative) {
+      try {
+        this.usingCapacitorMotion = true;
+        this.accelListener = await Motion.addListener("accel", (event: any) => {
+          this.lastEventTimestamp = Date.now();
+          this.dispatchMotionEvent(event);
+        });
+        this.isListening = true;
+        console.log("Using Capacitor Motion plugin for accelerometer data");
+
+        // Health check fallback if no events arrive
+        setTimeout(() => {
+          if (this.isListening && Date.now() - this.lastEventTimestamp > 3000) {
+            console.warn(
+              "No Motion plugin events received, falling back to devicemotion"
+            );
+            this.stopMotionMonitoring();
+            this.startWebFallback();
+          }
+        }, 3500);
+        return true;
+      } catch (err) {
+        console.warn(
+          "Capacitor Motion plugin failed, fallback to devicemotion",
+          err
+        );
+        this.usingCapacitorMotion = false;
+      }
+    }
+
+    // Fallback path
+    return this.startWebFallback();
+  }
+
+  private startWebFallback(): boolean {
     try {
       this.motionHandler = (event: DeviceMotionEvent) => {
-        console.log(
-          "Motion event received!",
-          event.accelerationIncludingGravity
-        );
-
-        if (!event.accelerationIncludingGravity) {
-          console.log("No acceleration data in event");
+        this.lastEventTimestamp = Date.now();
+        if (!event.accelerationIncludingGravity && !event.acceleration) {
           return;
         }
-
-        const motionData: NativeMotionData = {
-          accelerationIncludingGravity: {
-            x: event.accelerationIncludingGravity.x || 0,
-            y: event.accelerationIncludingGravity.y || 0,
-            z: event.accelerationIncludingGravity.z || 0,
+        const converted: any = {
+          accelerationIncludingGravity: event.accelerationIncludingGravity || {
+            x: 0,
+            y: 0,
+            z: 0,
           },
-          acceleration: {
-            x: event.acceleration?.x || 0,
-            y: event.acceleration?.y || 0,
-            z: event.acceleration?.z || 0,
-          },
-          rotationRate: {
-            alpha: event.rotationRate?.alpha || 0,
-            beta: event.rotationRate?.beta || 0,
-            gamma: event.rotationRate?.gamma || 0,
-          },
+          acceleration: event.acceleration || { x: 0, y: 0, z: 0 },
+          rotationRate: event.rotationRate || { alpha: 0, beta: 0, gamma: 0 },
           interval: event.interval || 16,
         };
-
-        this.motionListeners.forEach((listener) => {
-          try {
-            listener(motionData);
-          } catch (error) {
-            console.error("Motion listener error:", error);
-          }
-        });
+        this.dispatchMotionEvent(converted);
       };
 
-      console.log("Adding devicemotion event listener...");
+      console.log("Adding devicemotion event listener (fallback)...");
       window.addEventListener("devicemotion", this.motionHandler, true);
       this.isListening = true;
-      console.log("Motion monitoring started successfully");
 
-      // Test if events are firing
+      // Health check
       setTimeout(() => {
-        console.log("Motion monitoring status after 3 seconds:", {
-          isListening: this.isListening,
-          listenersCount: this.motionListeners.length,
-        });
-      }, 3000);
-
+        if (this.isListening && Date.now() - this.lastEventTimestamp > 3000) {
+          console.warn(
+            "No devicemotion events received (fallback path). Device may block sensors."
+          );
+        }
+      }, 3500);
       return true;
     } catch (error) {
-      console.error("Failed to start motion monitoring:", error);
+      console.error("Failed to start web fallback motion monitoring:", error);
       return false;
     }
   }
 
+  private dispatchMotionEvent(raw: any) {
+    // Throttle to target sample interval
+    const now = Date.now();
+    if (now - this.lastDispatch < this.sampleIntervalMs) return;
+    this.lastDispatch = now;
+
+    const ag = raw.accelerationIncludingGravity || { x: 0, y: 0, z: 0 };
+    const lin = raw.acceleration || { x: 0, y: 0, z: 0 };
+
+    // If linear accel not provided, derive by low‑pass filtering gravity
+    let linX = lin.x,
+      linY = lin.y,
+      linZ = lin.z;
+    if ((linX === 0 && linY === 0 && linZ === 0) || linX === undefined) {
+      this.gravity.x =
+        this.gravityAlpha * this.gravity.x +
+        (1 - this.gravityAlpha) * (ag.x || 0);
+      this.gravity.y =
+        this.gravityAlpha * this.gravity.y +
+        (1 - this.gravityAlpha) * (ag.y || 0);
+      this.gravity.z =
+        this.gravityAlpha * this.gravity.z +
+        (1 - this.gravityAlpha) * (ag.z || 0);
+      linX = (ag.x || 0) - this.gravity.x;
+      linY = (ag.y || 0) - this.gravity.y;
+      linZ = (ag.z || 0) - this.gravity.z;
+    }
+
+    const motionData: NativeMotionData = {
+      accelerationIncludingGravity: {
+        x: ag.x || 0,
+        y: ag.y || 0,
+        z: ag.z || 0,
+      },
+      acceleration: {
+        x: linX || 0,
+        y: linY || 0,
+        z: linZ || 0,
+      },
+      rotationRate: {
+        alpha: raw.rotationRate?.alpha || 0,
+        beta: raw.rotationRate?.beta || 0,
+        gamma: raw.rotationRate?.gamma || 0,
+      },
+      interval: raw.interval || this.sampleIntervalMs,
+    };
+
+    this.motionListeners.forEach((listener) => {
+      try {
+        listener(motionData);
+      } catch (error) {
+        console.error("Motion listener error:", error);
+      }
+    });
+  }
+
   stopMotionMonitoring(): void {
+    if (this.accelListener) {
+      try {
+        this.accelListener.remove();
+      } catch (_) {}
+      this.accelListener = null;
+    }
     if (this.motionHandler) {
       window.removeEventListener("devicemotion", this.motionHandler, true);
       this.motionHandler = null;
     }
     this.isListening = false;
     this.motionListeners = [];
+    this.usingCapacitorMotion = false;
     console.log("Motion monitoring stopped");
   }
 
-  async vibrate(style: "light" | "medium" | "heavy" = "light"): Promise<void> {
-    try {
-      if (this.isNative) {
-        const impactStyle =
-          style === "light"
-            ? ImpactStyle.Light
-            : style === "medium"
-            ? ImpactStyle.Medium
-            : ImpactStyle.Heavy;
-        await Haptics.impact({ style: impactStyle });
-      } else {
-        if ("vibrate" in navigator) {
-          const duration =
-            style === "light" ? 50 : style === "medium" ? 100 : 200;
-          navigator.vibrate(duration);
-        }
-      }
-    } catch (error) {
-      console.error("Vibration error:", error);
-    }
-  }
-
-  isNativePlatform(): boolean {
-    return this.isNative;
+  setSampleRate(hz: number) {
+    this.sampleIntervalMs = Math.max(10, Math.min(200, 1000 / hz));
   }
 
   getSensorStatus(): any {
@@ -217,9 +295,50 @@ export class NativeSensorManager {
       isListening: this.isListening,
       listenersCount: this.motionListeners.length,
       hasDeviceMotion: typeof DeviceMotionEvent !== "undefined",
-      hasPermissionAPI:
-        typeof (DeviceMotionEvent as any)?.requestPermission === "function",
+      usingCapacitorMotion: this.usingCapacitorMotion,
+      sampleIntervalMs: this.sampleIntervalMs,
+      lastEventAgeMs: this.lastEventTimestamp
+        ? Date.now() - this.lastEventTimestamp
+        : -1,
     };
+  }
+
+  async startNativeForegroundService(): Promise<void> {
+    try {
+      if (!Capacitor.isNativePlatform()) return;
+      await StepService.startService();
+      // start polling for step count every 10s and dispatch synthetic motion event if increased
+      if (servicePollingInterval) clearInterval(servicePollingInterval);
+      servicePollingInterval = setInterval(async () => {
+        try {
+          const { steps } = await StepService.getStepCount();
+          if (steps > lastNativeSteps) {
+            const delta = steps - lastNativeSteps;
+            lastNativeSteps = steps;
+            // We could dispatch a custom event or integrate with persistence directly
+            window.dispatchEvent(
+              new CustomEvent("nativeStepUpdate", { detail: { steps, delta } })
+            );
+          }
+        } catch (e) {
+          // silent
+        }
+      }, 10000);
+    } catch (e) {
+      console.warn("Failed to start native step service", e);
+    }
+  }
+  async stopNativeForegroundService(): Promise<void> {
+    try {
+      if (!Capacitor.isNativePlatform()) return;
+      await StepService.stopService();
+      if (servicePollingInterval) {
+        clearInterval(servicePollingInterval);
+        servicePollingInterval = null;
+      }
+    } catch (e) {
+      console.warn("Failed to stop native step service", e);
+    }
   }
 }
 

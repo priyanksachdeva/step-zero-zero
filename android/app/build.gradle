@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace "com.nothing.health"
@@ -28,6 +29,8 @@ repositories {
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
+    google()
+    mavenCentral()
 }
 
 dependencies {
@@ -40,6 +43,10 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+    // Health Connect client (release candidate - safer than alpha)
+    implementation "androidx.health.connect:connect-client:1.1.0-rc03"
+    // Kotlin stdlib (explicit)
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.24"
 }
 
 apply from: 'capacitor.build.gradle'

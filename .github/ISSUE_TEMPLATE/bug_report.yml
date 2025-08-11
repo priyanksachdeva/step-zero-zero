@@ -1,0 +1,127 @@
+name: Bug Report
+description: File a bug report to help us improve
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! 🐛
+
+        **Important**: Please ensure no personal health data is included in your report.
+
+  - type: checkboxes
+    id: health-data-check
+    attributes:
+      label: Privacy Confirmation
+      description: Confirm that your report is safe to share publicly
+      options:
+        - label: I have verified that this report contains no personal health data
+          required: true
+        - label: I understand that this report will be publicly visible
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the bug you encountered
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the bug
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+      placeholder: Describe what should have happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened
+      placeholder: Describe what actually happened
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device Type
+      description: What type of device are you using?
+      options:
+        - Android Phone
+        - Android Tablet
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: input
+    id: device-model
+    attributes:
+      label: Device Model
+      description: e.g. Pixel 7, Samsung Galaxy S23
+      placeholder: Device model
+    validations:
+      required: true
+
+  - type: input
+    id: android-version
+    attributes:
+      label: Android Version
+      description: e.g. Android 14, Android 13
+      placeholder: Android version
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: App Version
+      description: Found in app settings
+      placeholder: e.g. 1.0.0
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: health-impact
+    attributes:
+      label: Health Data Impact
+      description: Check all that apply (important for prioritization)
+      options:
+        - label: This bug affects health data accuracy
+        - label: This bug impacts step counting
+        - label: This bug affects heart rate monitoring
+        - label: This bug impacts sleep tracking
+        - label: This bug affects data synchronization
+        - label: This bug impacts data privacy/security
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context, screenshots, or information about the problem
+      placeholder: Add any other relevant information here
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **For security-related bugs, please report privately to security@stepzerozero.app**

@@ -30,7 +30,7 @@ export const usePedometer = () => {
       stepDetectorRef.current = new AdvancedStepDetector({
         sensitivity: settings.sensitivity,
         minStepInterval: 300,
-        sampleRate: 20, // Battery optimized
+        sampleRate: 20,
         filterWindowSize: 10,
       });
     }
@@ -39,9 +39,9 @@ export const usePedometer = () => {
       sensorManagerRef.current = new BatteryOptimizedSensorManager(
         stepDetectorRef.current,
         {
-          sampleRate: 20, // Battery optimized from 50Hz
+          sampleRate: 20,
           batchInterval: 5000,
-          idleTimeout: 300000, // 5 minutes
+          idleTimeout: 300000,
           enableSleepMode: true,
         }
       );
@@ -52,12 +52,8 @@ export const usePedometer = () => {
     restoreSessionIfNeeded();
 
     return () => {
-      if (sensorManagerRef.current) {
-        sensorManagerRef.current.stopMonitoring();
-      }
-      if (dataManagerRef.current) {
-        dataManagerRef.current.destroy();
-      }
+      if (sensorManagerRef.current) sensorManagerRef.current.stopMonitoring();
+      if (dataManagerRef.current) dataManagerRef.current.destroy();
     };
   }, []);
 
@@ -71,126 +67,72 @@ export const usePedometer = () => {
 
   // Restore session after app restart/crash
   const restoreSessionIfNeeded = useCallback(() => {
-    if (!dataManagerRef.current) return;
-
+    if (!dataManagerRef.current || !stepDetectorRef.current) return;
     const session = dataManagerRef.current.getCurrentSession();
     if (session) {
       const today = new Date().toISOString().split("T")[0];
-
-      // Only restore if it's the same day and recent (within 1 hour)
       if (session.date === today && Date.now() - session.lastSaved < 3600000) {
         setCurrentSteps(session.stepCount);
-        console.log("Session restored after restart");
+        if (session.calibration) {
+          stepDetectorRef.current.restoreCalibration({
+            currentThreshold: session.calibration.threshold,
+            averageActivity: session.calibration.averageActivity,
+          });
+        }
+        console.log("Session restored with calibration");
       } else {
         dataManagerRef.current.clearCurrentSession();
       }
     }
   }, []);
 
+  // Move saveTodayData earlier to avoid temporal dead zone
+  const saveTodayData = useCallback(
+    async (steps: number = currentSteps) => {
+      if (!dataManagerRef.current) return;
+      const settings = dataManagerRef.current.getUserSettings();
+      const todayData = {
+        date: new Date().toISOString().split("T")[0],
+        steps,
+        distance: (steps * settings.strideLength) / 100000,
+        calories: Math.floor(steps * 0.04 * (settings.weight / 70)),
+        activeTime: Math.floor(steps / 120),
+        goalAchieved: steps >= settings.dailyGoal,
+      };
+      await dataManagerRef.current.saveDailyData(todayData);
+    },
+    [currentSteps]
+  );
+
   // Step detection callback
-  const handleStepDetected = useCallback((newStepCount: number) => {
-    setCurrentSteps(newStepCount);
-
-    // Save session data for crash recovery
-    if (dataManagerRef.current) {
-      dataManagerRef.current.saveCurrentSession(newStepCount, Date.now());
-    }
-
-    // Auto-save every 50 steps to prevent data loss
-    if (newStepCount % 50 === 0) {
-      saveTodayData(newStepCount);
-    }
-  }, []);
+  const handleStepDetected = useCallback(
+    (newStepCount: number) => {
+      setCurrentSteps(newStepCount);
+      if (dataManagerRef.current && stepDetectorRef.current) {
+        const calib = stepDetectorRef.current.getCalibrationData();
+        dataManagerRef.current.saveCurrentSession(newStepCount, Date.now(), {
+          threshold: calib.currentThreshold,
+          averageActivity: calib.averageActivity,
+        });
+      }
+      if (newStepCount % 50 === 0) saveTodayData(newStepCount);
+    },
+    [saveTodayData]
+  );
 
   // Sensor status callback
   const handleSensorStatus = useCallback((online: boolean) => {
     setIsTracking(online);
   }, []);
 
-  // Save today's data
-  const saveTodayData = useCallback(
-    async (steps: number = currentSteps) => {
-      if (!dataManagerRef.current) return;
-
-      const settings = dataManagerRef.current.getUserSettings();
-      const todayData = {
-        date: new Date().toISOString().split("T")[0],
-        steps,
-        distance: (steps * settings.strideLength) / 100000, // Convert cm to km
-        calories: Math.floor(steps * 0.04 * (settings.weight / 70)), // Adjust for weight
-        activeTime: Math.floor(steps / 120), // Rough calculation
-        goalAchieved: steps >= settings.dailyGoal,
-      };
-
-      await dataManagerRef.current.saveDailyData(todayData);
-    },
-    [currentSteps]
-  );
-
-  // Start tracking with native sensors
-  const startNativeTracking = useCallback(async () => {
-    try {
-      // Check if we're on a native platform
-      const isNative = nativeSensorManager.isNativePlatform();
-      console.log("Platform check:", isNative ? "Native" : "Web");
-
-      // Provide haptic feedback
-      await nativeSensorManager.vibrate("light");
-
-      // Start motion monitoring with native sensors
-      const success = await nativeSensorManager.startMotionMonitoring(
-        (motionData: NativeMotionData) => {
-          if (!stepDetectorRef.current) return;
-
-          // Convert native motion data to our format
-          const accelerometerData = {
-            x: motionData.accelerationIncludingGravity.x,
-            y: motionData.accelerationIncludingGravity.y,
-            z: motionData.accelerationIncludingGravity.z,
-            timestamp: Date.now(),
-          };
-
-          // Process with step detector
-          const stepDetected =
-            stepDetectorRef.current.processAccelerometerData(accelerometerData);
-
-          if (stepDetected) {
-            const newStepCount = stepDetectorRef.current.getStepCount();
-            handleStepDetected(newStepCount);
-
-            // Provide haptic feedback for step
-            nativeSensorManager.vibrate("light");
-          }
-        }
-      );
-
-      if (success) {
-        setIsTracking(true);
-        setSensorSupported(true);
-        setPermissionGranted(true);
-        console.log("Native step tracking started successfully");
-        return true;
-      } else {
-        // Fallback to regular tracking
-        return startTracking();
-      }
-    } catch (error) {
-      console.error("Failed to start native tracking:", error);
-      // Fallback to regular tracking
-      return startTracking();
-    }
-  }, [handleStepDetected]);
-
   // Start tracking
   const startTracking = useCallback(async () => {
     if (!sensorManagerRef.current) return false;
-
     try {
       const success = await sensorManagerRef.current.startMonitoring(
         handleStepDetected,
         handleSensorStatus
       );
-
       if (success) {
         setIsTracking(true);
         setSensorSupported(true);
@@ -200,13 +142,56 @@ export const usePedometer = () => {
         setSensorSupported(false);
         setPermissionGranted(false);
       }
-
       return success;
     } catch (error) {
       console.error("Failed to start tracking:", error);
       return false;
     }
   }, [handleStepDetected, handleSensorStatus]);
+
+  // Start tracking with native sensors
+  const startNativeTracking = useCallback(async () => {
+    try {
+      const isNative = (nativeSensorManager as any).isNativePlatform
+        ? (nativeSensorManager as any).isNativePlatform()
+        : true;
+      console.log("Platform check:", isNative ? "Native" : "Web");
+      if ((nativeSensorManager as any).vibrate)
+        await (nativeSensorManager as any).vibrate("light");
+      if (sensorManagerRef.current)
+        sensorManagerRef.current.updateConfiguration({ batchInterval: 1000 });
+      const success = await nativeSensorManager.startMotionMonitoring(
+        (motionData: NativeMotionData) => {
+          if (!stepDetectorRef.current) return;
+          const accelerometerData = {
+            x: motionData.acceleration.x,
+            y: motionData.acceleration.y,
+            z: motionData.acceleration.z,
+            timestamp: Date.now(),
+          };
+          const stepDetected =
+            stepDetectorRef.current.processAccelerometerData(accelerometerData);
+          if (stepDetected) {
+            const newStepCount = stepDetectorRef.current.getStepCount();
+            handleStepDetected(newStepCount);
+            if ((nativeSensorManager as any).vibrate)
+              (nativeSensorManager as any).vibrate("light");
+          }
+        }
+      );
+      if (success) {
+        setIsTracking(true);
+        setSensorSupported(true);
+        setPermissionGranted(true);
+        console.log("Native step tracking started successfully");
+        return true;
+      }
+      return startTracking();
+    } catch (error) {
+      console.error("Failed to start native tracking:", error);
+      return startTracking();
+    }
+  }, [handleStepDetected, startTracking]);
 
   // Stop tracking
   const stopTracking = useCallback(() => {
@@ -229,10 +214,10 @@ export const usePedometer = () => {
     if (isTracking) {
       stopTracking();
     } else {
-      // Try native tracking first, fallback to regular tracking
-      await startNativeTracking();
+      const nativeOk = await startNativeTracking();
+      if (!nativeOk) await startTracking();
     }
-  }, [isTracking, startNativeTracking, stopTracking]);
+  }, [isTracking, startNativeTracking, startTracking, stopTracking]);
 
   // Reset daily steps
   const resetDailySteps = useCallback(() => {

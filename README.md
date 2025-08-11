@@ -1,53 +1,219 @@
-# Welcome to your Lovable project
+# Nothing Health - Step Zero Zero
 
-## Project info
+A modern, minimalist health tracking application inspired by Nothing's design philosophy. Track your daily steps, monitor health metrics, and stay motivated with a clean, technical interface.
 
-**URL**: https://lovable.dev/projects/6ecd6699-2820-4dd3-8e0a-1eeec82ccda3
+![Nothing Health Banner](docs/images/banner.png)
 
-## How can I edit this code?
+## 🎯 Features
 
-There are several ways of editing your application.
+### Core Functionality
 
-**Use Lovable**
+- **Real-time Step Tracking** - Advanced step detection using device sensors
+- **Health Connect Integration** - Sync with Google Health Connect for comprehensive data
+- **Native Performance** - Capacitor-powered native Android app
+- **Offline-first** - Works without internet connection
+- **PWA Support** - Install as Progressive Web App
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6ecd6699-2820-4dd3-8e0a-1eeec82ccda3) and start prompting.
+### Health Metrics
 
-Changes made via Lovable will be committed automatically to this repo.
+- Daily step counting with goal tracking
+- Distance and calorie calculation
+- Active time monitoring
+- Weekly progress visualization
+- Heart rate monitoring (device dependent)
+- Sleep tracking (beta)
+- Hydration and nutrition logging
 
-**Use your preferred IDE**
+### Design
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Nothing-inspired UI** - Minimalist, technical aesthetic
+- **Dark theme** - Pure black background with Nothing red accents
+- **Responsive design** - Optimized for all Android screen sizes
+- **Accessibility** - ARIA labels, screen reader support
+- **Battery optimized** - Efficient sensor usage
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📱 Screenshots
 
-Follow these steps:
+| Home Screen                   | Analytics                               | Health Metrics                    |
+| ----------------------------- | --------------------------------------- | --------------------------------- |
+| ![Home](docs/images/home.png) | ![Analytics](docs/images/analytics.png) | ![Health](docs/images/health.png) |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚀 Quick Start
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Node.js 18+ and npm/yarn
+- Android Studio with SDK 33+
+- Java 11+
+- Git
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Development Setup
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/priyanksachdeva/step-zero-zero.git
+   cd step-zero-zero
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Run development server**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for Android**
+   ```bash
+   npm run build
+   npx cap add android
+   npx cap sync
+   npx cap open android
+   ```
+
+### Quick Commands
+
+```bash
+# Development
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run preview      # Preview build
+
+# Android
+npm run android      # Build and open Android Studio
+npm run sync         # Sync web assets to native
 ```
 
-**Edit a file directly in GitHub**
+## 📖 Documentation
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- [Installation Guide](docs/INSTALLATION.md) - Detailed setup instructions
+- [Android Development](docs/ANDROID.md) - Android-specific development guide
+- [API Reference](docs/API.md) - Component and hook documentation
+- [Architecture](docs/ARCHITECTURE.md) - Project structure and design decisions
+- [Contributing](docs/CONTRIBUTING.md) - How to contribute to the project
+- [Deployment](docs/DEPLOYMENT.md) - Play Store release process
 
-**Use GitHub Codespaces**
+## 🏗️ Architecture
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
+### Tech Stack
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: Tailwind CSS + shadcn/ui components
+- **Mobile**: Capacitor 6 + Android native code
+- **State**: React hooks + localStorage persistence
+- **Health**: Google Health Connect integration
+- **Sensors**: Native Android sensor APIs
+
+### Project Structure
+
+```
+step-zero-zero/
+├── src/                    # React application source
+│   ├── components/         # UI components
+│   │   ├── ui/            # shadcn/ui components
+│   │   ├── layout/        # Layout components
+│   │   └── tabs/          # Tab-specific components
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Utilities and helpers
+│   └── pages/             # Page components
+├── android/               # Capacitor Android project
+│   └── app/src/main/      # Android native code
+│       ├── java/          # Java/Kotlin source
+│       └── res/           # Android resources
+├── public/                # Static assets
+├── docs/                  # Documentation
+└── scripts/               # Build and utility scripts
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+
+### Development Process
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+### Code Style
+
+- TypeScript for type safety
+- ESLint + Prettier for code formatting
+- Conventional commits for commit messages
+- Component-first architecture
+
+## 📋 Requirements
+
+### Minimum Requirements
+
+- Android 8.0 (API level 26) or higher
+- 2GB RAM
+- 100MB storage space
+- Motion sensors (accelerometer/gyroscope)
+
+### Recommended
+
+- Android 12+ for best Health Connect experience
+- 4GB+ RAM for smooth performance
+- Biometric sensors for heart rate monitoring
+
+## 🔒 Privacy & Security
+
+- **Local Storage**: All data stored locally on device
+- **No Tracking**: No analytics or user tracking
+- **Health Connect**: Optional integration with user consent
+- **Permissions**: Minimal permissions requested
+- **Open Source**: Full transparency in code
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Nothing](https://nothing.tech) for design inspiration
+- [Capacitor](https://capacitorjs.com) for native integration
+- [shadcn/ui](https://ui.shadcn.com) for UI components
+- [React](https://react.dev) ecosystem for development tools
+
+## 🐛 Support
+
+- **Issues**: [GitHub Issues](https://github.com/priyanksachdeva/step-zero-zero/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/priyanksachdeva/step-zero-zero/discussions)
+- **Email**: [support@stepzerozero.app](mailto:support@stepzerozero.app)
+
+## 🚀 Roadmap
+
+### Version 1.1
+
+- [ ] Apple Health integration
+- [ ] Watch companion app
+- [ ] Advanced analytics
+- [ ] Social features
+
+### Version 1.2
+
+- [ ] Workout tracking
+- [ ] Meditation timer
+- [ ] Custom goals
+- [ ] Data export/import
+
+---
+
+<div align="center">
+  <p>Built with ❤️ using Nothing design principles</p>
+  <p>
+    <a href="https://github.com/priyanksachdeva/step-zero-zero">⭐ Star on GitHub</a> •
+    <a href="https://play.google.com/store/apps/details?id=com.nothing.health">📱 Download on Play Store</a>
+  </p>
+</div>
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?

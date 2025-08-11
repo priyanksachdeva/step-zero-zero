@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- ===================== PERMISSIONS (Ordered & Annotated) ===================== -->
+    <!-- Network access for API calls / analytics -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Physical activity recognition (native step APIs / classification) -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <!-- Foreground service base permission -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Foreground health service (API 34+) for continuous step tracking -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <!-- Post notifications (Android 13+) so user can manage persistent tracking notification -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Camera for heart rate (PPG) measurement using rear camera -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Haptic feedback for subtle UI vibrations -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Health Connect app query so we can detect availability -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+
+    <!-- ===================== HARDWARE FEATURES ===================== -->
+    <!-- Accelerometer required for step detection -->
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
+    <!-- Camera required for heart rate feature -->
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <!-- Flash optional (improves PPG quality but not mandatory) -->
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
+
+    <!-- ===================== APPLICATION ===================== -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,12 +46,10 @@
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <provider
@@ -31,34 +59,14 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Foreground step tracking service scaffold -->
+        <service
+            android:name=".StepTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="health|dataSync" />
+
     </application>
-
-    <!-- Permissions -->
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    
-    <!-- Health & Fitness Sensors -->
-    <uses-permission android:name="android.permission.BODY_SENSORS" />
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-    
-    <!-- Motion Sensors -->
-    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
-    
-    <!-- Camera for Heart Rate -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.FLASHLIGHT" />
-    
-    <!-- Vibration for Haptic Feedback -->
-    <uses-permission android:name="android.permission.VIBRATE" />
-    
-    <!-- Wake Lock for Continuous Monitoring -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    
-    <!-- Hardware Requirements -->
-    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
-    <uses-feature android:name="android.hardware.sensor.gyroscope" android:required="false" />
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
 </manifest>

@@ -591,6 +591,24 @@
   .transition-slow {
     transition: all var(--duration-slow) var(--ease-out);
   }
+
+  /* Safe area utilities */
+  .safe-px {
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+  }
+  .safe-pt {
+    padding-top: var(--safe-top);
+  }
+  .safe-pb {
+    padding-bottom: var(--safe-bottom);
+  }
+  .bottom-nav-safe {
+    padding-bottom: calc(var(--safe-bottom) + 4px);
+  }
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
 }
 
 /* Animations */

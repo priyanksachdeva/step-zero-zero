@@ -19,6 +19,7 @@ import NutritionDashboard from "@/components/NutritionDashboard";
 import PWAInstallButton from "@/components/PWAInstallButton";
 import { DebugPanel } from "@/components/DebugPanel";
 import { usePedometer } from "@/hooks/usePedometer";
+import { useClock } from "@/hooks/useClock";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -60,6 +61,12 @@ import {
 } from "@/components/icons/NothingIcon";
 import { useState, useEffect } from "react";
 import { UserProfile } from "@/lib/healthInsights";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { BottomNav, MainTab } from "@/components/layout/BottomNav";
+import { SettingsOverlay } from "@/components/layout/SettingsOverlay";
+import { MetricsGrid } from "@/components/MetricsGrid";
+import { HomeTab } from "@/components/tabs/HomeTab";
+import { getMotivationalMessage } from "@/lib/motivation";
 
 type TabType = "home" | "health" | "insights" | "profile";
 
@@ -81,9 +88,11 @@ const EnhancedIndex = () => {
     fitnessLevel: "intermediate" as const,
     strideLength: 75,
   });
-  const [timeOfDay, setTimeOfDay] = useState<
-    "morning" | "afternoon" | "evening" | "night"
-  >("morning");
+  const {
+    dateLabel: currentDate,
+    timeLabel: currentTime,
+    timeOfDay,
+  } = useClock();
 
   const {
     currentSteps,
@@ -112,15 +121,6 @@ const EnhancedIndex = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, [currentSteps]);
-
-  // Determine time of day for contextual messaging
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 6) setTimeOfDay("night");
-    else if (hour < 12) setTimeOfDay("morning");
-    else if (hour < 18) setTimeOfDay("afternoon");
-    else setTimeOfDay("evening");
-  }, []);
 
   // Load user profiles from localStorage
   useEffect(() => {
@@ -167,39 +167,7 @@ const EnhancedIndex = () => {
     updateSettings({ dailyGoal: newGoal });
   };
 
-  const currentDate = new Date()
-    .toLocaleDateString("en-GB", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    })
-    .toUpperCase();
-
-  const currentTime = new Date().toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  const getMotivationalMessage = () => {
-    const progressPercent = Math.round(progress * 100);
-
-    if (progressPercent === 0) {
-      return timeOfDay === "morning"
-        ? "Ready to start your day?"
-        : "Time to get moving";
-    } else if (progressPercent < 25) {
-      return "Every step counts";
-    } else if (progressPercent < 50) {
-      return "Building momentum";
-    } else if (progressPercent < 75) {
-      return "Over halfway there";
-    } else if (progressPercent < 100) {
-      return "Almost at your goal";
-    } else {
-      return "Goal achieved! 🎯";
-    }
-  };
+  const motivational = getMotivationalMessage(progress, timeOfDay);
 
   const TabButton = ({
     id,
@@ -544,222 +512,26 @@ const EnhancedIndex = () => {
 
       default:
         return (
-          <div className="space-y-6">
-            {/* Enhanced Sensor Status Alert */}
-            {(!sensorSupported || !permissionGranted) && (
-              <Alert className="border-destructive/20 bg-destructive/5">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle className="font-technical text-sm">
-                  {!sensorSupported
-                    ? "SENSOR NOT SUPPORTED"
-                    : "PERMISSION REQUIRED"}
-                </AlertTitle>
-                <AlertDescription className="text-xs font-mono">
-                  {!sensorSupported
-                    ? "Device motion sensors not available"
-                    : "Grant motion sensor access to track steps"}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Enhanced Progress Ring with Nothing aesthetics */}
-            <div className="relative flex justify-center">
-              <ProgressRing
-                progress={progress}
-                size={280}
-                strokeWidth={3}
-                className="transition-nothing"
-              >
-                <StepCounter
-                  steps={currentSteps}
-                  size="large"
-                  showAnimation={currentSteps > previousSteps}
-                />
-              </ProgressRing>
-            </div>
-
-            {/* Enhanced Goal Status */}
-            <Card className="border-border/30 bg-card/30 backdrop-blur-sm">
-              <CardContent className="pt-4 text-center">
-                <div className="space-y-2">
-                  <div className="tech-label">DAILY TARGET</div>
-                  <div className="font-display text-xl text-muted-foreground tabular-nums">
-                    {dailyGoal.toLocaleString()} STEPS
-                  </div>
-                  <div className="flex justify-center items-center space-x-2">
-                    <Progress value={progress * 100} className="w-24 h-1" />
-                    <span className="font-mono text-xs text-muted-foreground/70">
-                      {Math.round(progress * 100)}%
-                    </span>
-                    {progress >= 1 && (
-                      <Badge
-                        variant="secondary"
-                        className="text-[10px] px-1 py-0 bg-success/20 text-success"
-                      >
-                        <CheckCircle className="w-2 h-2 mr-1" />
-                        GOAL REACHED
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Enhanced Metrics Grid */}
-            <div className="grid grid-cols-3 gap-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="w-full">
-                    <MetricCard
-                      icon={<Target className="w-5 h-5" />}
-                      label="DISTANCE"
-                      value={parseFloat(distance)}
-                      unit="KM"
-                      previousValue={parseFloat(distance) * 0.9}
-                      trend={
-                        parseFloat(distance) > parseFloat(distance) * 0.9
-                          ? "up"
-                          : "neutral"
-                      }
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Total distance walked today</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="w-full">
-                    <MetricCard
-                      icon={<Zap className="w-5 h-5" />}
-                      label="CALORIES"
-                      value={calories}
-                      unit="CAL"
-                      previousValue={calories * 0.85}
-                      trend={calories > calories * 0.85 ? "up" : "neutral"}
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Calories burned through walking</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="w-full">
-                    <MetricCard
-                      icon={<Activity className="w-5 h-5" />}
-                      label="ACTIVE"
-                      value={`${Math.floor(activeTime / 60)}H ${
-                        activeTime % 60
-                      }M`}
-                      unit=""
-                      previousValue={`${Math.floor(activeTime / 60) * 0.8}H`}
-                      trend={activeTime > activeTime * 0.8 ? "up" : "neutral"}
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Active time spent walking</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-
-            {/* Enhanced Week Progress */}
-            <WeekProgress weekData={weekData} className="transition-nothing" />
-
-            {/* Enhanced Controls */}
-            <div className="flex space-x-3">
-              <Button
-                onClick={toggleTracking}
-                className={`btn-nothing ${
-                  isTracking ? "primary" : ""
-                } flex-1 flex items-center justify-center space-x-2 transition-all duration-200 hover:scale-105`}
-              >
-                {isTracking ? (
-                  <>
-                    <Pause className="w-4 h-4" />
-                    <span>PAUSE</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" />
-                    <span>START</span>
-                  </>
-                )}
-              </Button>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={resetDailySteps}
-                    variant="outline"
-                    aria-label="Reset daily step count"
-                    className="btn-nothing transition-all duration-200 hover:scale-105"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Reset daily step count</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-
-            {/* Enhanced Status Indicators */}
-            {batteryOptimized && (
-              <div className="text-center">
-                <Badge
-                  variant="secondary"
-                  className="text-xs px-2 py-1 bg-success/20 text-success"
-                >
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  BATTERY OPTIMIZED
-                </Badge>
-              </div>
-            )}
-
-            {/* Enhanced Motivational Section */}
-            <Card className="border-border/20 bg-card/20 backdrop-blur-sm">
-              <CardContent className="pt-4 text-center space-y-2">
-                <div className="text-xs text-muted-foreground/50 font-mono">
-                  {getMotivationalMessage()}
-                </div>
-                <Button
-                  onClick={() => setShowSettings(true)}
-                  variant="ghost"
-                  size="sm"
-                  className="btn-nothing primary transition-all duration-200 hover:scale-105"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  SETTINGS
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Enhanced Footer */}
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground/50 font-mono space-y-1">
-                <div className="flex items-center justify-center gap-2">
-                  <span>{currentDate}</span>
-                  <Separator orientation="vertical" className="h-3" />
-                  <span>{currentTime}</span>
-                </div>
-                <div className="flex items-center justify-center gap-1">
-                  <span>STEPS TODAY</span>
-                  <Badge variant="outline" className="text-[8px] px-1 py-0">
-                    PHASE 3
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            {/* Debug Panel for Step Detection */}
-            <DebugPanel />
-          </div>
+          <HomeTab
+            sensorSupported={sensorSupported}
+            permissionGranted={permissionGranted}
+            progress={progress}
+            currentSteps={currentSteps}
+            previousSteps={previousSteps}
+            dailyGoal={dailyGoal}
+            distance={distance}
+            calories={calories}
+            activeTime={activeTime}
+            weekData={weekData}
+            isTracking={isTracking}
+            batteryOptimized={batteryOptimized}
+            toggleTracking={toggleTracking}
+            resetDailySteps={resetDailySteps}
+            openSettings={() => setShowSettings(true)}
+            motivational={motivational}
+            currentDate={currentDate}
+            currentTime={currentTime}
+          />
         );
     }
   };
@@ -767,119 +539,30 @@ const EnhancedIndex = () => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background text-foreground">
-        {/* PWA Install Button */}
         <PWAInstallButton />
-
-        {/* Mobile-optimized Container - Responsive for all phone sizes */}
         <div className="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto px-2 sm:px-4">
-          {/* Enhanced Header - Mobile optimized with better UX */}
-          <div className="px-3 py-3 border-b border-border/20 bg-background/95 backdrop-blur-sm">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] px-1 py-0">
-                  <Activity className="w-2 h-2 mr-1" />
-                  STEPS
-                </Badge>
-                <div className="font-mono text-xs text-muted-foreground">
-                  {currentDate}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <div className="font-display text-lg tabular-nums">
-                    {currentTime}
-                  </div>
-                </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => setShowSettings(true)}
-                      variant="ghost"
-                      size="sm"
-                      className="p-1 h-6 w-6 btn-nothing hover:bg-accent/10 transition-all duration-200"
-                    >
-                      <Settings className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs">Open settings</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-
-          {/* Tab Content - Responsive mobile viewport */}
+          <AppHeader
+            currentDate={currentDate}
+            currentTime={currentTime}
+            onOpenSettings={() => setShowSettings(true)}
+          />
           <div className="px-3 py-3 pb-20 min-h-[calc(100vh-120px)] overflow-y-auto">
             {renderTabContent()}
           </div>
-
-          {/* Enhanced Bottom Navigation - Responsive mobile-optimized */}
-          <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg">
-            <div className="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto px-2 sm:px-4">
-              <div className="grid grid-cols-4 px-1 py-1">
-                <TabButton
-                  id="home"
-                  label="HOME"
-                  icon={Home}
-                  isActive={activeTab === "home"}
-                />
-                <TabButton
-                  id="health"
-                  label="HEALTH"
-                  icon={Heart}
-                  isActive={activeTab === "health"}
-                />
-                <TabButton
-                  id="insights"
-                  label="DATA"
-                  icon={BarChart3}
-                  isActive={activeTab === "insights"}
-                />
-                <TabButton
-                  id="profile"
-                  label="PROFILE"
-                  icon={Target}
-                  isActive={activeTab === "profile"}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Enhanced Settings Panel - Mobile Optimized with better UX */}
-          {showSettings && (
-            <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 overflow-y-auto">
-              <div className="w-full max-w-[320px] mx-auto p-3 min-h-screen">
-                <Card className="border-border/50 bg-card/50 backdrop-blur-sm mb-3">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="tech-label text-accent text-sm flex items-center gap-2">
-                        <Settings className="w-4 h-4" />
-                        SETTINGS
-                      </CardTitle>
-                      <Button
-                        onClick={() => setShowSettings(false)}
-                        variant="ghost"
-                        size="sm"
-                        className="btn-nothing text-xs hover:bg-accent/10"
-                      >
-                        <span>CLOSE</span>
-                      </Button>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <SettingsPanel
-                  settings={settings}
-                  onSettingsChange={updateSettings}
-                  onExportData={exportData}
-                  onImportData={importData}
-                  batteryOptimized={batteryOptimized}
-                  sensorSupported={sensorSupported}
-                />
-              </div>
-            </div>
-          )}
+          <BottomNav
+            active={activeTab as MainTab}
+            onChange={(t) => setActiveTab(t as TabType)}
+          />
+          <SettingsOverlay
+            open={showSettings}
+            onClose={() => setShowSettings(false)}
+            settings={settings}
+            onSettingsChange={updateSettings}
+            onExportData={exportData}
+            onImportData={importData}
+            batteryOptimized={batteryOptimized}
+            sensorSupported={sensorSupported || false}
+          />
         </div>
       </div>
     </TooltipProvider>

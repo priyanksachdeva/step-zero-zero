@@ -1,0 +1,121 @@
+MIT License
+
+Copyright (c) 2025 Nothing Health - Step Zero Zero
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Additional Licenses and Attributions
+
+### Third-Party Libraries
+
+#### React and React Ecosystem
+
+- React: MIT License (Copyright (c) Meta Platforms, Inc. and affiliates)
+- React Router: MIT License
+- React Query: MIT License
+
+#### UI Libraries
+
+- Tailwind CSS: MIT License (Copyright (c) Tailwind Labs, Inc.)
+- Radix UI: MIT License (Copyright (c) WorkOS)
+- Lucide React: ISC License (Copyright (c) Lucide Contributors)
+
+#### Build Tools
+
+- Vite: MIT License (Copyright (c) 2019-present, Yuxi (Evan) You and Vite contributors)
+- TypeScript: Apache License 2.0 (Microsoft Corporation)
+- ESLint: MIT License
+
+#### Mobile Framework
+
+- Capacitor: MIT License (Copyright (c) 2017-present Ionic)
+
+#### Android Dependencies
+
+- AndroidX Libraries: Apache License 2.0 (Google Inc.)
+- Health Connect: Apache License 2.0 (Google Inc.)
+- Kotlin: Apache License 2.0 (JetBrains)
+
+### Font License
+
+#### Ndot 47 Inspired by Nothing
+
+This project uses a font inspired by Nothing's design language. The font file included in this project is for demonstration purposes only. For commercial use, please ensure you have appropriate licensing from the font creator or use an alternative open-source font.
+
+Alternative open-source fonts that achieve similar aesthetic:
+
+- JetBrains Mono (Apache License 2.0)
+- Fira Code (SIL Open Font License)
+- Source Code Pro (SIL Open Font License)
+
+### Design Inspiration
+
+This project is inspired by Nothing's design philosophy and aesthetic principles. While this is an open-source project, it is not officially affiliated with or endorsed by Nothing Technology Limited.
+
+Nothing's design principles that inspire this project:
+
+- Minimalism and functional design
+- Technical precision and attention to detail
+- Bold use of contrast and typography
+- User-centered design approach
+
+### Icons and Graphics
+
+Icons used in this project are from:
+
+- Lucide Icons: ISC License (https://lucide.dev/)
+- Custom icons: Licensed under this project's MIT license
+
+### Code Attribution
+
+Portions of this code may be inspired by or adapted from:
+
+- Capacitor community plugins (various licenses, see individual plugin documentation)
+- React community examples and patterns (MIT License)
+- Android developer documentation samples (Apache License 2.0)
+
+### Health Data Compliance
+
+This software is designed to comply with:
+
+- GDPR (General Data Protection Regulation)
+- HIPAA guidelines for health data (where applicable)
+- Google Play Store health data policies
+- Android health data best practices
+
+### Disclaimer
+
+This software is provided for educational and personal use. While it includes health tracking features, it is not intended to be used as a medical device or for medical diagnosis. Users should consult healthcare professionals for medical advice.
+
+### Contributing
+
+By contributing to this project, you agree that your contributions will be licensed under the same MIT License that covers the project. See CONTRIBUTING.md for details.
+
+### Contact
+
+For licensing questions or concerns, please contact:
+
+- Email: legal@stepzerozero.app
+- GitHub: https://github.com/priyanksachdeva/step-zero-zero/issues
+
+---
+
+Last updated: August 2025

@@ -259,13 +259,18 @@ export class DataPersistenceManager {
   /**
    * Session management for crash recovery
    */
-  saveCurrentSession(stepCount: number, sessionStart: number): void {
+  saveCurrentSession(
+    stepCount: number,
+    sessionStart: number,
+    calibration?: { threshold: number; averageActivity: number }
+  ): void {
     try {
       const sessionData = {
         stepCount,
         sessionStart,
         lastSaved: Date.now(),
         date: new Date().toISOString().split("T")[0],
+        calibration: calibration || null,
       };
 
       localStorage.setItem(
